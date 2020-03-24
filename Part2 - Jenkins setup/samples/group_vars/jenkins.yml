@@ -1,0 +1,30 @@
+ansible_ssh_private_key_file: ~/.ssh/path/to/your/key.pem
+ansible_user: ubuntu
+
+jenkins_version: "2.220"
+jenkins_prefer_lts: true
+jenkins_plugins:
+  - ssh
+  - rebuild
+  - greenballs
+  - locale
+  - git
+  - github
+  - github-branch-source
+  - workflow-aggregator
+
+jenkins_github_username: my_username
+jenkins_github_token:
+    id: devopspro_github_token
+    description: DevOpsPro test github token
+    secret_text: {{ here goes your key }}
+
+jenkins_github_servers:
+  - credential_id: devopspro_github_token
+    api_url: https://api.github.com/
+    name: github.com
+
+jenkins_shared_library_name: <name-of-the-library-repo>
+jenkins_shared_library_repo: <git-url-for-library-repo>
+jenkins_shared_library_credentials: devopspro_github_token_login
+jenkins_shared_library_branch: master

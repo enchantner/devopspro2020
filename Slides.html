@@ -1,0 +1,342 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>"From Script to Pipeline" - Nikolay Markov at DevOpsPro 2020</title>
+
+		<link rel="stylesheet" href="vendor/reveal.js-3.9.2/css/reset.css">
+		<link rel="stylesheet" href="vendor/reveal.js-3.9.2/css/reveal.css">
+		<link rel="stylesheet" href="vendor/reveal.js-3.9.2/css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="vendor/reveal.js-3.9.2/lib/css/monokai.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'vendor/reveal.js-3.9.2/css/print/pdf.css' : 'vendor/reveal.js-3.9.2/css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>From Script to Pipeline</h1>
+					<h3>Long Road and Shortcuts</h3>
+					<a href="https://devopspro.lt/"><img src="assets/img/devopspro_logo2.png" width="300" height="129"></a>
+					<a href="https://alignedresearch.com/"><img src="assets/img/arg_logo.png" width="300" height="129"></a>
+					<p>Nikolay Markov (@enchantner), DevOpsPro 2020</p>
+				</section>
+				<section>
+					<p>
+						All the materials for this workshop are available here: <br />
+						<a href="https://github.com/enchantner/devopspro2020">https://github.com/enchantner/devopspro2020</a>
+					</p>
+				</section>
+				<section>
+					<h3>Shameless Plug</h3>
+					<div style="text-align: left; float: left; font-size: 60%; width: 70%;">
+						<ul>
+							<li style="padding-bottom: 15px;">My name is Nikolay Markov and my nick is <a href="https://www.linkedin.com/in/nickmarkov/">@enchantner</a> pretty much everywhere</li>
+					    	<li style="padding-bottom: 15px;">I work as a Principal Architect at <a href="https://alignedresearch.com/">Aligned Research Group</a></li>
+					    	<li style="padding-bottom: 15px;">Mostly nowadays I use Python, Golang and a bit of C++ and Scala to write code</li>
+					    	<li style="padding-bottom: 15px;">Worked with private and public clouds and networking for several years</li>
+					    	<li style="padding-bottom: 15px;">Write articles (for now mostly in <a href="https://xakep.ru/author/enchantner">russian</a>), read lectures and organize <a href="https://www.meetup.com/PyData-SPb/">events</a></li>
+					    	<li style="padding-bottom: 15px;">Really like chatting about modern technologies and low-level magic</li>
+						</ul>
+					</div>
+
+					<div style="text-align: right; float: right; width: 30%;">
+					    <img src="assets/img/me.png" width="300" height="425">
+					</div>
+				</section>
+				<section>
+					<section><h3>Our goals for today</h3></section>
+					<section>
+						<div style="text-align: left; float: left; font-size: 60%; width: 70%;">
+							<h3>Stage 1 - Python project</h3>
+							<ul>
+								<li>Setup the environment for production Python development using&nbsp;<a href="https://github.com/pyenv/pyenv">pyenv</a>&nbsp;and (optionally)&nbsp;<a href="https://python-poetry.org/">poetry</a></li>
+								<li>Make a quick overview of Python package ecosystem</li>
+								<li>Learn how to prepare your code for <a href="https://12factor.net/">production</a> and how to <a href="https://packaging.python.org/tutorials/packaging-projects/">build Python packages</a></li>
+								<li style="color: red;">This is not a workshop on Python though</li>
+							</ul>
+						</div>
+						<div style="text-align: center; float: right; width: 30%;">
+					    	<img src="assets/img/pythonlogo.svg" width="200" height="200">
+					    	<p style="font-size: 10px;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/freepik">Freepik</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						</div>
+					</section>
+					<section>
+						<div style="text-align: left; float: left; font-size: 60%; width: 70%;">
+							<h3>Stage 2 - Deploying Jenkins with Ansible</h3>
+							<ul>
+								<li>I know we can do it&nbsp;<a href="https://hub.docker.com/r/jenkins/jenkins">with containers</a>, but let's get our hands dirty</li>
+								<li>I've asked you to prepare a VM to set things up (I'll use AWS), may work even with local Virtualbox (but it won't be easy)</li>
+								<li>We will be using&nbsp;<a href="https://github.com/geerlingguy/ansible-role-jenkins">this</a>&nbsp;publically available&nbsp;<a href="https://www.ansible.com/">Ansible</a>&nbsp;role to deploy stuff (thanks,&nbsp;<a href="https://github.com/geerlingguy">geerlingguy</a>!)</li>
+								<li>Some low level Jenkins tinkering is involved to make things work</li>
+							</ul>
+						</div>
+						<div style="text-align: center; float: right; width: 30%;">
+					    	<img src="assets/img/jenkins_logo.svg" width="226" height="312">
+						</div>
+					</section>
+					<section>
+						<div style="text-align: left; float: left; font-size: 60%; width: 70%;">
+							<h3>Stage 3 - Infrastructure as a Code</h3>
+							<ul>
+								<li>It's not only Jenkins that uses&nbsp;<a href="https://groovy-lang.org/">Groovy language</a>&nbsp;for its declarative pipelines</li>
+								<li>Jenkins has a really good approach for storing shared code called&nbsp;<a href="https://jenkins.io/doc/book/pipeline/shared-libraries/">Shared Libraries</a></li>
+								<li>We'll take a look at&nbsp;<a href="https://gradle.org/">Gradle</a>&nbsp;is an industrial standard build tool for both running jobs and running tests on them</li>
+								<li>One of the good ways to test your project is to set up a&nbsp;<a href="https://jenkins.io/doc/tutorials/build-a-multibranch-pipeline-project/">Multibranch Pipeline</a></li>
+							</ul>
+						</div>
+						<div style="text-align: center; float: right; width: 30%;">
+					    	<img src="assets/img/groovy_logo.png" width="400" height="217">
+						</div>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Some details about Python infrastructure</h3>
+						<img src="assets/img/package.svg" width="100" height="100">
+						<p style="font-size: 10px;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/freepik">Freepik</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						<ol style="font-size: 30px;">
+							<li>Python projects usually use&nbsp;<a href="https://packaging.python.org/guides/tool-recommendations/">Pip</a>&nbsp;as a package manager</li>
+							<li>Python packages are different from OS packages, so the advice here is <span style="color: red;">never ever use ~$ sudo pip install %packagename%</span></li>
+							<li>Almost everyone knows about <a href="https://docs.python.org/3/howto/pyporting.html">Python 2 vs 3</a>, but it's still generally a good idea to stick to an exact version of things</li>
+						</ol>
+					</section>
+					<section>
+						<h3>People tend to argue about things</h3>
+						<div style="text-align: left; float: left; font-size: 70%; width: 70%;">
+							<ul style="margin-top: 10%;">
+								<li><a href="https://unix.stackexchange.com/questions/986/what-are-the-pros-and-cons-of-vim-and-emacs">Vim or Emacs?</a></li>
+								<li><a href="https://unix.stackexchange.com/questions/634/what-are-the-pros-cons-of-deb-vs-rpm">RPM or DEB?</a></li>
+								<li><a href="https://en.wikipedia.org/wiki/Tanenbaum%E2%80%93Torvalds_debate">Microkernel or Monolith?</a></li>
+								<li>Which wrapper to use for Virtualenv?</li>
+							</ul>
+						</div>
+						<div style="text-align: center; float: right; width: 30%;">
+					    	<img src="assets/img/argue.svg" width="200" height="200">
+							<p style="font-size: 10px;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/flat-icons">Flat-icons</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						</div>
+					</section>
+					<section>
+						<h3>Pyenv & Poetry</h3>
+						<p>I never quite managed them to work together, but I'll show you my setup</p>
+						<p>For those interested there is <a href="https://blog.jayway.com/2019/12/28/pyenv-poetry-saviours-in-the-python-chaos/">this link</a></p>
+						<p><a href="https://virtualenvwrapper.readthedocs.io/en/latest/">Virtualenvwrapper</a>&nbsp;used to be very popular, now I just use the same commands with <a href="https://github.com/pyenv/pyenv">pyenv</a> and a <a href="https://github.com/pyenv/pyenv-virtualenv">plugin</a> for it</p>
+						<pre style='color:#000000;background:#f1f0f0;'>mkvirtualenv<span style='color:#806030; '>()</span><span style='color:#806030; '>{</span> pyenv virtualenv $@<span style='color:#806030; '>;</span> pyenv activate <span style='color:#e60000; '>"${@: -1}"</span> <span style='color:#806030; '>}</span>
+<span style='color:#bb7977; font-weight:bold; '>alias</span> lsvirtualenv<span style='color:#806030; '>=</span><span style='color:#e60000; '>'pyenv virtualenvs'</span>
+<span style='color:#bb7977; font-weight:bold; '>alias</span> rmvirtualenv<span style='color:#806030; '>=</span><span style='color:#e60000; '>'pyenv virtualenv-delete'</span>
+<span style='color:#bb7977; font-weight:bold; '>alias</span> workon<span style='color:#806030; '>=</span><span style='color:#e60000; '>'pyenv activate'</span>
+<span style='color:#bb7977; font-weight:bold; '>alias</span> deactivate<span style='color:#806030; '>=</span><span style='color:#e60000; '>'pyenv deactivate'</span>
+</pre>
+<!--Created using ToHtml.com on 2020-03-23 16:59:58 UTC -->
+					</section>
+					<section>
+						<h3>Which format to choose for config files?</h3>
+						<p>Not going to start a holywar, let's use YAML!</p>
+					</section>
+					<section>
+						<h3>Python packages again</h3>
+						<img src="assets/img/package.svg" width="100" height="100">
+						<p style="font-size: 10px;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/freepik">Freepik</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						<ul>
+							<li>Two (<a href="https://setuptools.readthedocs.io/en/latest/formats.html">three</a>) types: <i>.tar.gz</i> and <i>.whl</i></li>
+							<li><b>setup.py</b> is used as a main installation file</li>
+							<li>Python looks for packages in an environment variable called <a href="https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH">PYTHONPATH</a></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Typical project structure</h3>
+						<pre>
+<span style='color: orange;'>my_package</span> <- our project directory, usually named as package
+├── <span style='color: green;'>MANIFEST.in</span> <- will talk about this one in a moment
+├── <span style='color: orange;'>my_package</span> <- our future Python module’s name, that will be in "<i>import my_package</i>"
+│ ├── <span style='color: green;'>cli.py</span> <- basic file which is a CLI entry point with some business logic
+│ ├── <span style='color: green;'>config.yaml</span> <- configuration file
+│ └── <span style='color: green;'>__init__.py</span> <- an empty file which converts an empty directory into a Python module
+├── <span style='color: green;'>requirements.txt</span> <- list of project dependencies
+└── <span style='color: green;'>setup.py</span> <- will talk about this one in a moment
+						</pre>
+					</section>
+					<section>
+						<h3>Let's package it!</h3>
+						<p>// building .tar.gz package</p>
+						<p>~$ <b>python setup.py sdist</b></p>
+						<p>// building .whl package</p>
+						<p>~$ <b>python setup.py bdist_wheel</b></p>
+					</section>
+					<section>
+						<h3>Development (editable) mode</h3>
+						<p><a href="https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs">Create a symbolic link</a> inside PYTHONPATH pretending that package is installed</p>
+						<p>~$ <s>python setup.py develop</s></p>
+						<p>~$ pip install --editable .</p>
+					</section>
+					<section>
+						<h3>Tips and tricks</h3>
+						<ul>
+							<li>Use imports starting from package name:
+<pre style='color:#000000;background:#f1f0f0;'><span style='color:#400000; font-weight:bold; '>from</span> my_package<span style='color:#806030; '>.</span>config <span style='color:#400000; font-weight:bold; '>import</span> config
+</pre>
+</li>
+							<li>With an "editable mode" is gets easy to miss adding non-Python files into <span style="color: green;">MANIFEST.in</span> - don’t forget to re-check it manually</li>
+							<li><span style="color: green;">setup.py</span> ideally should be located inside project root, or you won’t be able to install your package with pip directly from git.</li>
+							<li>But if you genuinely don’t care and your CI/CD doesn’t depend on it, then it’s not necessary.</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Documentation</h3>
+						<div style="text-align: left; float: left; font-size: 70%; width: 70%;">
+							<p>Do you write comments in your code?</p>
+							<p>We will need packages <span style="color: green;">sphinx</span> and <span style="color: green;">sphinx-argparse</span></p>
+							<p>Let's create a <span style="color: orange;">docs</span> directory in project root and run <br /><span style="color: blue;">~$ sphinx-quickstart</span> inside</p>
+							<p>Inside <span style="color: green;">conf.py</span> let’s add <span style="color: red;">'sphinxarg.ext'</span> into extensions and also uncomment these lines on top of the file (mind two dots):</p>
+<pre style='color:#000000;background:#f1f0f0;'><span style='color:#400000; font-weight:bold; '>import</span> os
+<span style='color:#400000; font-weight:bold; '>import</span> sys
+sys<span style='color:#806030; '>.</span>path<span style='color:#806030; '>.</span>insert<span style='color:#806030; '>(</span><span style='color:#8c0000; '>0</span><span style='color:#806030; '>,</span> os<span style='color:#806030; '>.</span>path<span style='color:#806030; '>.</span>abspath<span style='color:#806030; '>(</span><span style='color:#e60000; '>'..'</span><span style='color:#806030; '>)</span><span style='color:#806030; '>)</span>
+</pre>
+						</div>
+						<div style="text-align: center; float: right; width: 30%; background-color: white;">
+					    	<img src="assets/img/documentation.svg" width="200" height="200">
+							<p style="font-size: 10px; color: black;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/monkik">monkik</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						</div>
+					</section>
+					<section>
+						<h3>Uploading our new cool package to server</h3>
+						<ul style="font-size: 70%;">
+							<li>Two main files - <span style="color: green;">~/.pypirc</span> and <span style="color: green;">~/.pip/pip.conf</span></li>
+							<li>~$ <span style="color: blue;">htpasswd -nb username password</span> <i># generates data for .htpasswd</i></li>
+							<li>~$ <span style="color: blue;">pypi-server -P .htpasswd -p 7777 ./packages</span></li>
+							<li>~$ <span style="color: blue;">python setup.py bdist_wheel upload -r myrepo</span> # old style</li>
+							<li>~$ <span style="color: blue;">twine upload  --repository-url http://127.0.0.1:7777/ -u my_username -p 123456 dist/* --verbose</span> # new style</li>
+							<li>Tip: you can use <span style="color: blue;">pip install keyring</span> module and then run ~$ <span style="color: blue;">keyring set http://127.0.0.1:7777/ my_username</span> to avoid specifying user/pass pair to <span style="color: orange;">twine</span> explicitly</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Let's do some CI/CD!</h3>
+						<div style="text-align: left; float: left; font-size: 70%; width: 70%;">
+							<ul>
+								<li>Let's create a GitHub token for this specific purpose: <a href="https://github.com/settings/tokens">Settings -> Developer Settings -> Personal access tokens</a></li>
+								<li>It has to have two permission groups: <span style="color: orange;">"repo"</span> and <span style="color: orange;">"admin:repo_hook"</span></li>
+								<li>Copy it over somewhere, as you're allowed to see it only once</li>
+							</ul>
+						</div>
+						<div style="text-align: center; float: right; width: 30%;">
+					    	<img src="assets/img/key.svg" width="200" height="200">
+							<p style="font-size: 10px;">Icon made by&nbsp;<a href="https://www.flaticon.com/authors/smashicons">SmashIcons</a>&nbsp;from&nbsp;<a href="http://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a></p>
+						</div>
+					</section>
+					<section>
+						<h3>Note: Don't forget to enable the access to your Jenkins node IP for itself if you're using AWS</h3>
+					</section>
+					<section>
+						<h3>Dramatis personae</h3>
+						<ul>
+							<li><a href="https://github.com/geerlingguy/ansible-role-jenkins">geerlingguy/ansible-role-jenkins</a> as Jenkins</li>
+							<li><a href="https://github.com/geerlingguy/ansible-role-java">geerlingguy/ansible-role-java</a> as Java</li>
+							<li><a href="https://jenkins.io/doc/book/pipeline/">Groovy</a> as Jenkins' little helper</li>
+							<li>Directed and narrated by <a href="https://www.ansible.com/">Ansible</a></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Act One: Introduction</h3>
+						<h4>Entering Ansible, Java and Jenkins</h4>
+						<ul>
+							<li>~$ <span style="color: blue;">pip install ansible</span></li>
+							<li>~$ <span style="color: blue;">ansible-galaxy install geerlingguy.jenkins</span></li>
+							<li>~$ <span style="color: blue;">ansible-galaxy install geerlingguy.java</span></li>
+						</ul>
+						<p>Ansible sits inside virtualenv, Java and Jenkins are relaxing at <span style="color: orange;">~/.ansible/roles</span></p>
+					</section>
+					<section>
+						<h3>Act Two: Preparing for Journey</h3>
+						<h4>Entering Ansible putting items into a bag:</h4>
+						<ul style="font-size: 70%;">
+							<li><span style="color: green;">jenkins.yml</span> with a host address inside</li>
+							<li><span style="color: green;">inventory.ini</span> with the same address</li>
+							<li>yet another <span style="color: green;">jenkins.yml</span>, but in <span style="color: orange;">group_vars</span> with a bunch of plugins and a path to a key inside</li>
+						</ul>
+						<p style="font-size: 70%;">Ansible thoughtfully writes a cryptic message, obscuring the GitHub token: <br />~$ <span style="color: blue;">ansible-vault encrypt_string 'your-github-token-here' --name 'secret_text'</span> and puts it into <span style="color: orange;">group_vars/jenkins.yml</span> as well</p>
+					</section>
+					<section>
+						<h3>Act Three: Lovers</h3>
+						<h4>Entering Jenkins and Java:</h4>
+						<ul style="font-size: 70%;">
+							<li>~$ <span style="color: blue;">mkdir roles</span></li>
+							<li>~$ <span style="color: blue;">cp -r ~/.ansible/roles/geerlingguy.jenkins ./roles</span></li>
+							<li>~$ <span style="color: blue;">cp -r ~/.ansible/roles/geerlingguy.java ./roles</span></li>
+						</ul>
+						<p style="font-size: 70%;">Jenkins sits next to Java in <span style="color: orange;">./roles</span>, explicitly showing how deeply he depends on her</p>
+					</section>
+					<section>
+						<h3>Act Four: Secret Mission</h3>
+						<h4>Entering Groovy and Ansible</h4>
+						<ul style="font-size: 70%;">
+							<li>Groovy is sitting at <span style="color: green;">./roles/geerlingguy.jenkins/templates/1_create_token_credentials.groovy.j2</span></li>
+							<li>Ansible finishes small tasks, like adding <span style="color: blue;">update_cache: yes</span> to <span style="color: green;">./roles/geerlingguy.java/tasks/setup-Debian.yml</span></li>
+							<li>Also, Ansible gets <span style="color: green;">1_task_create_token_creds.yml</span> from his pocket and puts its content into <span style="color: green;">./roles/geerlingguy.jenkins/tasks/main.yml</span></li>
+						</ul>
+						<p style="font-size: 70%;">Groovy is casually tossing tokens on his palm. Ansible looks a little displeased by this.</p>
+					</section>
+					<section>
+						<h3>Act Five: Unexpected Guests</h3>
+						<h4>Entering Groovy and Shared Library</h4>
+						<ul style="font-size: 70%;">
+							<li>Groovy is smiling as <a href="https://dev.to/kuperadrian/how-to-setup-a-unit-testable-jenkins-shared-pipeline-library-2e62">Shared Library</a> is entering. She is well tested and has a beautiful interface.</li>
+							<li>Groovy carefully shows her directions to her GitHub repo, putting path to it into <span style="color: green;">group_vars/jenkins.yml</span></li>
+							<li>Also, Ansible passes by and after a reverence puts <span style="color: green;">2_task_create_shared_library.yml</span> inside his <span style="color: green;">./roles/geerlingguy.jenkins/tasks/main.yml</span></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Act Six: Wedding</h3>
+						<h4>Entering everyone</h4>
+						<ul style="font-size: 70%;">
+							<li>Ansible turns on some calming music and does <br />~$ <span style="color: blue;">ansible-playbook jenkins.yml -i inventory.ini -l jenkins -vvv --ask-vault-pass</span>, saying a cryptic password. Everyone relaxes.</li>
+							<li>Every guest gets a piece of paper with <span style="color: red;">admin:admin</span> written on it</li>
+							<li>Jenkins and Java hold each other's hands and slowly go together to a port <span style="color: green;">8080</span></li>
+						</ul>
+						<p style="font-size: 70%;">This is a beginning of a new beautiful CI/CD</p>
+					</section>
+				</section>
+				<section>
+					<h3>Gradle</h3>
+					<h4>You will only need three commands</h4>
+					<ul style="font-size: 70%;">
+						<li>~$ <span style="color: blue;">gradle init</span> to create a project</li>
+						<li>~$ <span style="color: blue;">./gradlew rest -DbaseUrl=http://jenkins-url:8080/ -Dusername=admin -Dpassword=admin -Dpattern=src/main/groovy/myproject.groovy</span> to create a project</li>
+						<li>~$ <span style="color: blue;">./gradlew clean test --info</span> to run testsssssssssss</li>
+					</ul>
+				</section>
+			</div>
+		</div>
+
+		<script src="vendor/reveal.js-3.9.2/js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				hash: true,
+				dependencies: [
+					{ src: 'vendor/reveal.js-3.9.2/plugin/markdown/marked.js' },
+					{ src: 'vendor/reveal.js-3.9.2/plugin/markdown/markdown.js' },
+					{ src: 'vendor/reveal.js-3.9.2/plugin/highlight/highlight.js' },
+					{ src: 'vendor/reveal.js-3.9.2/plugin/notes/notes.js', async: true }
+				],
+				transition: 'convex',
+				slideNumber: true
+			});
+		</script>
+	</body>
+</html>

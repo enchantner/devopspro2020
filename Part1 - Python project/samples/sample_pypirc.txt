@@ -1,0 +1,8 @@
+[distutils]
+index-servers =
+    myrepo
+
+[myrepo]
+repository: http://myrepo.example.com:8088
+username: my_user
+password: 123456

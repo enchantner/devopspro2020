@@ -1,0 +1,8 @@
+- name: Create token credentials
+  template:
+    src: 1_create_token_credentials.groovy.j2
+    dest: "{{ jenkins_home }}/init.groovy.d/1_create_token_credentials.groovy"
+    owner: "{{ jenkins_process_user }}"
+    group: "{{ jenkins_process_group }}"
+    mode: 0775
+  notify: restart jenkins

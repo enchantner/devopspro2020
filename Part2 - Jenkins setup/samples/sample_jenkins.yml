@@ -1,0 +1,8 @@
+- hosts: jenkins
+  vars:
+    jenkins_hostname: <your-jenkins-node-ip-address>
+  roles:
+    - role: geerlingguy.java
+      become: yes
+    - role: geerlingguy.jenkins
+      become: yes
